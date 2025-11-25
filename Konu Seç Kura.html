@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Konu Seç ve Çalışıldı Sistemi (Mobil Uyumlu)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Mobil uyum için -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+      padding: 0;
+      line-height: 1.4;
+    }
+    h2 {
+      margin-bottom: 10px;
+      font-size: 1.2em;
+      text-align: center;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    button {
+      flex: 1 1 auto;
+      min-width: 100px;
+      padding: 12px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: 1px solid #666;
+      background: #f2f2f2;
+      cursor: pointer;
+    }
+    button:active {
+      background: #ddd;
+    }
+    #current {
+      margin: 15px 0;
+      padding: 12px;
+      border: 1px dashed #666;
+      border-radius: 8px;
+      min-height: 50px;
+      font-size: 1em;
+      text-align: center;
+    }
+    h3 {
+      margin-top: 20px;
+      font-size: 1.1em;
+      text-align: center;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0;
+      max-height: 250px; /* mobilde uzun listeyi kaydırılabilir yapar */
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    li {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      font-size: 0.95em;
+    }
+    li:last-child {
+      border-bottom: none;
+    }
+    details {
+      margin-top: 15px;
+      font-size: 1em;
+    }
+    summary {
+      cursor: pointer;
+      padding: 8px;
+      border: 1px solid #666;
+      border-radius: 6px;
+      background: #f9f9f9;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Konu Seçme Sistemi 📱</h2>
+  <div class="buttons">
+    <button onclick="sec()">Konu Seç</button>
+    <button onclick="calisildi()">Çalışıldı</button>
+    <button onclick="reset()">Sıfırla</button>
+  </div>
+
+  <div id="current">Henüz konu seçilmedi.</div>
+
+  <h3>Çalışılan Konular</h3>
+  <ul id="history"></ul>
+
+  <details>
+    <summary>Tüm Konular</summary>
+    <div id="topicsCount"></div>
+    <ul id="topicsList"></ul>
+  </details>
+
+  <script>
+    const konular = [
+      "Türkçe ve Dilbilgisi",
+      "Atatürk İlkeleri ve İnkılap Tarihi",
+      "T.C. Anayasası",
+      "657 sayılı Devlet Memurları Kanunu (Geçici ve Ek Geçici maddeler hariç)",
+      "1 sayılı Cumhurbaşkanlığı Kararnamesi (9. bölüm)",
+      "4982 sayılı Bilgi Edinme Hakkı Kanunu",
+      "3071 sayılı Dilekçe Hakkının Kullanılmasına Dair Kanun",
+      "7315 sayılı Güvenlik Soruşturması ve Arşiv Araştırması Kanunu",
+      "İçişleri Bakanlığı Personeli Görevde Yükselme ve Unvan Değişikliği Yönetmeliği",
+      "İçişleri Bakanlığı Personeli Atama ve Yer Değiştirme Yönetmeliği",
+      "Devlet Memurları Disiplin Yönetmeliği",
+      "İçişleri Bakanlığı Disiplin Amirleri Yönetmeliği",
+      "Resmi Yazışmalarda Uygulanacak Usul ve Esaslar Hakkında Yönetmelik",
+      "5442 sayılı İl İdaresi Kanunu",
+      "3628 sayılı Mal Bildiriminde Bulunulması, Rüşvet ve Yolsuzluklarla Mücadele Kanunu",
+      "Mal Bildiriminde Bulunulması Hakkında Yönetmelik",
+      "2577 sayılı İdari Yargılama Usulü Kanunu",
+      "4483 sayılı Memurlar ve Diğer Kamu Görevlilerinin Yargılanması Hakkında Kanun",
+      "5326 sayılı Kabahatler Kanunu",
+      "Valilik ve Kaymakamlık Birimleri Teşkilat, Görev ve Çalışma Yönetmeliği",
+      "İçişleri Bakanlığı Merkez ve Taşra Teşkilatı Arşiv Hizmetleri Yönetmeliği",
+      "5651 sayılı İnternet Ortamında Yapılan Yayınların Düzenlenmesi ve Bu Yayınlar Yoluyla İşlenen Suçlarla Mücadele Edilmesi Hakkında Kanun",
+      "Telekomünikasyon Kurumu Tarafından Erişim Sağlayıcılara ve Yer Sağlayıcılara Faaliyet Belgesi Verilmesine İlişkin Usul ve Esaslar Hakkında Yönetmelik",
+      "İnternet Toplu Kullanım Sağlayıcıları Hakkında Yönetmelik",
+      "İnternet Ortamında Yapılan Yayınların Düzenlenmesine Dair Usul ve Esaslar Hakkında Yönetmelik",
+      "2429 sayılı Ulusal Bayram ve Genel Tatiller Hakkında Kanun",
+      "2893 sayılı Türk Bayrağı Kanunu",
+      "Eskimiş, Solmuş, Yırtılmış ve Kullanılamayacak Duruma Gelmiş Bayrakların Yok Edilmesi Usul ve Esaslarını Gösterir Yönetmelik",
+      "Ulusal ve Resmi Bayramlar ile Mahalli Kurtuluş Günleri, Atatürk Günleri ve Tarihi Günlerde Yapılacak Tören ve Kutlamalar Yönetmeliği",
+      "İl ve ilçe İnsan Hakları Kurullarının Kuruluş, Görev ve Çalışma Esasları Hakkında Yönetmelik",
+      "6245 sayılı Harcırah Kanunu",
+      "5393 sayılı Belediye Kanunu",
+      "442 sayılı Köy Kanunu",
+      "3091 sayılı Taşınmaz Mal Zilyedliğine Yapılan Tecavüzlerin Önlenmesi Hakkında Kanun",
+      "Taşınmaz Mal Zilyetliğine Yapılan Tecavüzlerin Önlenmesi Hakkında Kanunun Uygulama Şekli ve Esaslarına Dair Yönetmelik",
+      "Sınır Anlaşmazlığı, Mülki Ayrılma ve Birleşme ile Köy Kurulması ve Kaldırılması Hakkında Yönetmelik",
+      "5253 sayılı Dernekler Kanunu",
+      "7201 sayılı Tebligat Kanunu"
+    ];
+
+    let secilen = null;
+    let calisilanlar = [];
+
+    function sec() {
+      secilen = konular[Math.floor(Math.random() * konular.length)];
+      document.getElementById("current").innerText = "Seçilen konu: " + secilen;
+    }
+
+    function calisildi() {
+      if (secilen) {
+        calisilanlar.push(secilen);
+        renderCalisilanlar();
+        document.getElementById("current").innerText = "Henüz konu seçilmedi.";
+        secilen = null;
+      } else {
+        alert("Önce bir konu seçmelisin!");
+      }
+    }
+
+    function renderCalisilanlar() {
+      const ul = document.getElementById("history");
+      ul.innerHTML = "";
+      if (calisilanlar.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "Henüz çalışılan konu yok.";
+        ul.appendChild(li);
+      } else {
+        calisilanlar.forEach((k, i) => {
+          const li = document.createElement("li");
+          li.textContent = (i+1) + ". " + k;
+          ul.appendChild(li);
+        });
+      }
+    }
+
+    function reset() {
+      calisilanlar = [];
+      secilen = null;
+      document.getElementById("current").innerText = "Henüz konu seçilmedi.";
+      renderCalisilanlar();
+    }
+
+    function renderAllTopics() {
+      const ul = document.getElementById("topicsList");
+      ul.innerHTML = "";
+      konular.forEach((k, i) => {
+        const li = document.createElement("li");
+        li.textContent = (i+1) + ". " + k;
+        ul.appendChild(li);
+      });
+      document.getElementById("topicsCount").innerText = "Toplam konu: " + konular.length;
+    }
+
+    // İlk yüklemede çalışılanlar ve tüm konular
+    renderCalisilanlar();
+    renderAllTopics();
+  </script>
+</body>
+</html>
