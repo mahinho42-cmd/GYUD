@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>İçişleri Bakanlığı Görevde Yükselme ve Unvan Değişikliği Sınavı</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 10px; font-size: 20px; }
+  h1 { text-align: center; margin-bottom: 5px; font-size: 26px; }
+  h2 { text-align: center; margin-top: 0; font-size: 22px; color: #555; }
+  .ders { 
+    padding: 16px; 
+    margin: 8px 0; 
+    border: 2px solid #ccc; 
+    border-radius: 8px;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .secili { background-color: #ffeaa7; border: 3px solid #e17055; }
+  .calisildi { background-color: #c8f7c5; }
+  button { 
+    margin: 8px; 
+    padding: 16px; 
+    font-size: 20px; 
+    width: 100%; 
+    border-radius: 8px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+  }
+  button:hover { background-color: #0056b3; }
+  #raporSonucu { margin-top: 12px; font-weight: bold; font-size: 20px; text-align: center; }
+  #dersListesi { max-height: 500px; overflow-y: auto; }
+  #geriSayim { font-size: 24px; font-weight: bold; text-align: center; margin: 12px; }
+  #seciliDersKutusu {
+    border: 3px solid #0984e3;
+    padding: 14px;
+    margin: 12px 0;
+    border-radius: 8px;
+    background-color: #dfe6e9;
+    font-weight: bold;
+    text-align: center;
+    font-size: 22px;
+  }
+  footer { text-align: center; margin-top: 25px; font-size: 16px; color: #333; }
+</style>
+</head>
+<body>
+
+<h1>İçişleri Bakanlığı Görevde Yükselme ve Unvan Değişikliği Sınavı</h1>
+<h2>Yazı İşleri Müdürü Sınav Konuları</h2>
+
+<div id="dersListesi"></div>
+
+<div id="seciliDersKutusu">
+  Seçilen Ders: <span id="seciliDers">Henüz seçilmedi</span>
+</div>
+<div id="geriSayim"></div>
+
+<button onclick="kuraSec()">🎲 Kura Seç</button>
+<button onclick="calisildi()">✅ Çalışıldı</button>
+<button onclick="temizle()">🗑️ Temizle</button>
+
+<p id="raporSonucu"></p>
+
+<footer>
+  Bu uygulama Mahmut Şahin tarafından hazırlanmıştır. (a) 2026
+</footer>
+
+<script>
+const dersler = [
+"Türkçe ve Dilbilgisi",
+"657 sayılı Devlet Memurları Kanunu (Geçici Maddeleri ve Ek Geçici Maddeleri Hariç)",
+"Atatürk İlkeleri ve İnkılap Tarihi",
+"T.C. Anayasası",
+"1 sayılı Cumhurbaşkanlığı Kararnamesi (9.bölüm)",
+"4982 sayılı Bilgi Edinme Hakkı Kanunu",
+"3071 sayılı Dilekçe Hakkının Kullanılmasına Dair Kanun",
+"7315 sayılı Güvenlik Soruşturması ve Arşiv Araştırması Kanunu",
+"İçişleri Bakanlığı Personeli Görevde Yükselme ve Unvan Değişikliği Yönetmeliği",
+"İçişleri Bakanlığı Personeli Atama ve Yer Değiştirme Yönetmeliği",
+"Devlet Memurları Disiplin Yönetmeliği",
+"İçişleri Bakanlığı Disiplin Amirleri Yönetmeliği",
+"Resmi Yazışmalarda Uygulanacak Usul ve Esaslar Hakkında Yönetmelik",
+"3628 sayılı Mal Bildiriminde Bulunulması, Rüşvet ve Yolsuzluklarla Mücadele Kanunu",
+"Mal Bildiriminde Bulunulması Hakkında Yönetmelik",
+"4483 sayılı Memurlar ve Diğer Kamu Görevlilerinin Yargılanması Hakkında Kanun",
+"5651 sayılı İnternet Ortamında Yapılan Yayınların Düzenlenmesi ve Bu Yayınlar Yoluyla İşlenen Suçlarla Mücadele Edilmesi Hakkında Kanun",
+"Telekomünikasyon Kurumu Tarafından Erişim Sağlayıcılara ve Yer Sağlayıcılara Faaliyet Belgesi Verilmesine İlişkin Usul ve Esaslar Hakkında Yönetmelik",
+"İnternet Toplu Kullanım Sağlayıcıları Hakkında Yönetmelik",
+"İnternet Ortamında Yapılan Yayınların Düzenlenmesine Dair Usul ve Esaslar Hakkında Yönetmelik",
+"2429 sayılı Ulusal Bayram ve Genel Tatiller Hakkında Kanun",
+"2893 sayılı Türk Bayrağı Kanunu",
+"Eskimiş, Solmuş, Yırtılmış ve Kullanılamayacak Duruma Gelmiş Bayrakların Yok Edilmesi Usul ve Esaslarını Gösterir Yönetmelik",
+"Ulusal ve Resmi Bayramlar İle Mahalli Kurtuluş Günleri, Atatürk Günleri ve Tarihi Günlerde Yapılacak Tören ve Kutlamalar Yönetmeliği",
+"Valilik ve Kaymakamlık Birimleri Teşkilat, Görev ve Çalışma Yönetmeliği",
+"İçişleri Bakanlığı Merkez ve Taşra Teşkilatı Arşiv Hizmetleri Yönetmeliği",
+"İl ve İlçe İnsan Hakları Kurullarının Kuruluş, Görev ve Çalışma Esasları Hakkında Yönetmelik",
+"Sınır Anlaşmazlığı, Mülki Ayrılma ve Birleşme ile Köy Kurulması ve Kaldırılması Hakkında Yönetmelik",
+"5442 sayılı İl İdaresi Kanunu",
+"2577 sayılı İdari Yargılama Usulü Kanunu",
+"5326 sayılı Kabahatler Kanunu",
+"6245 sayılı Harcırah Kanunu",
+"5393 sayılı Belediye Kanunu",
+"442 sayılı Köy Kanunu",
+"5253 sayılı Dernekler Kanunu",
+"7201 sayılı Tebligat Kanunu",
+"3091 sayılı Taşınmaz Mal Zilyedliğine Yapılan Tecavüzlerin Önlenmesi Hakkında Kanun",
+"Taşınmaz Mal Zilyetliğine Yapılan Tecavüzlerin Önlenmesi Hakkında Kanunun Uygulama Şekli ve Esaslarına Dair Yönetmelik"
+];
+
+let calisilan = JSON.parse(localStorage.getItem("calisilanDersler")) || {};
+let secili = null;
+
+function listeyiYaz() {
+  const div = document.getElementById("dersListesi");
+  div.innerHTML = "";
+  dersler.forEach(d => {
+    const p = document.createElement("div");
+    p.className = "ders";
+    if (calisilan[d]) {
+      p.classList.add("calisildi");
+      p.textContent = d + " (Çalışıldı: " + calisilan[d] + ")";
+    } else {
+      p.textContent = d;
+    }
+    if (secili === d) {
+      p.classList.add("secili");
+    }
+    p.onclick = () => {
+      if (secili === d) {
+        secili = null;
+        document.getElementById("seciliDers").textContent = "Henüz seçilmedi";
+      } else {
+        secili = d;
+        document.getElementById("seciliDers").textContent = secili;
+      }
+      listeyiYaz();
+    };
+    div.appendChild(p);
+  });
+  rapor(); // Liste her yenilendiğinde raporu güncelle
+}
+
+function kuraSec() {
+  const kalan = dersler.filter(d => !calisilan[d]);
+  if (kalan.length === 0) {
+    alert("Tüm dersler çalışıldı!");
+    return;
+  }
+  let sayac = 3;
+  const geriDiv = document.getElementById("geriSayim");
+  geriDiv.textContent = sayac;
+  const interval = setInterval(() => {
+    sayac--;
+    if (sayac > 0) {
+      geriDiv.textContent = sayac;
+    } else {
+      clearInterval(interval);
+      geriDiv.textContent = "";
+      secili = kalan[Math.floor(Math.random() * kalan.length)];
+      document.getElementById("seciliDers").textContent = secili;
+      listeyiYaz();
+    }
+  }, 1000);
+}
+
+function calisildi() {
+  if (!secili) {
+    alert("Önce bir ders seçin!");
+    return;
+  }
+  calisilan[secili] = new Date().toLocaleString();
+  localStorage.setItem("calisilanDersler", JSON.stringify(calisilan));
+  secili = null;
+  document.getElementById("seciliDers").textContent = "Henüz seçilmedi";
+  listeyiYaz();
+}
+
+function temizle() {
+  if (confirm("Temizlemek istiyor musunuz?")) {
+    calisilan = {};
+    localStorage.removeItem("calisilanDersler");
+    secili = null;
+    document.getElementById("seciliDers").textContent = "Henüz seçilmedi";
+    listeyiYaz();
+  }
+}
+
+function rapor() {
+  const toplam = dersler.length;
+  const calisilanSayisi = Object.keys(calisilan).length;
+  const kalan = toplam - calisilanSayisi;
+  document.getElementById("raporSonucu").textContent =
+    "Toplam Konu: " + toplam + " | Çalışılan: " + calisilanSayisi + " | Kalan: " + kalan;
+}
+
+// Sayfa açıldığında listeyi yazdır ve raporu göster
+listeyiYaz();
+rapor();
+</script>
+
+</body>
+</html>
